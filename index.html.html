@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feliz 15 Anos, Victoria!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes ribbon {
+            0% { transform: translateX(-50%) rotate(-2deg); }
+            50% { transform: translateX(-50%) rotate(2deg); }
+            100% { transform: translateX(-50%) rotate(-2deg); }
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 15px rgba(255, 105, 180, 0.7); }
+            50% { box-shadow: 0 0 25px rgba(255, 105, 180, 0.9); }
+            100% { box-shadow: 0 0 15px rgba(255, 105, 180, 0.7); }
+        }
+        
+        @keyframes openGift {
+            0% { transform: rotateX(0deg); height: 200px; }
+            100% { transform: rotateX(-180deg); height: 0; }
+        }
+        
+        .gift-container {
+            perspective: 1000px;
+        }
+        
+        .gift-box {
+            animation: pulse 2s infinite, glow 3s infinite;
+            transform-style: preserve-3d;
+            transition: all 0.5s ease;
+        }
+        
+        .gift-box:hover {
+            transform: scale(1.05) rotate(-5deg);
+        }
+        
+        .gift-lid {
+            transform-origin: bottom;
+        }
+        
+        .gift-opened .gift-lid {
+            animation: openGift 1s forwards;
+        }
+        
+        .ribbon {
+            animation: ribbon 3s infinite;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f0f;
+            opacity: 0;
+        }
+        
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            color: #ff69b4;
+            opacity: 0;
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-pink-50 to-pink-100 min-h-screen flex flex-col items-center justify-center p-4 font-serif overflow-hidden">
+    <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-6xl font-bold text-pink-600 mb-2">Feliz 15 Anos!</h1>
+        <p class="text-xl md:text-2xl text-pink-500">Uma celebração especial para Victoria</p>
+    </div>
+    
+    <div class="text-center mb-4">
+        <p class="text-lg text-pink-600 animate-pulse">Clique na caixa para abrir seu presente!</p>
+    </div>
+    
+    <div class="gift-container relative mb-12">
+        <div id="gift" class="gift-box bg-gradient-to-b from-pink-400 to-pink-600 w-64 h-64 rounded-lg relative cursor-pointer">
+            <!-- Ribbon -->
+            <div class="ribbon absolute -top-1 left-1/2 transform -translate-x-1/2 w-48 h-6 bg-gradient-to-r from-pink-300 to-pink-400 rounded-sm shadow-md"></div>
+            <div class="ribbon absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-48 bg-gradient-to-b from-pink-300 to-pink-400 rounded-sm shadow-md"></div>
+            
+            <!-- Bow -->
+            <div class="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                <div class="w-10 h-10 bg-pink-400 rounded-full relative shadow-inner">
+                    <div class="absolute top-1/2 left-1/2 w-14 h-6 bg-pink-400 transform -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-sm"></div>
+                    <div class="absolute top-1/2 left-1/2 w-14 h-6 bg-pink-400 transform -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-sm"></div>
+                    <div class="absolute top-1/2 left-1/2 w-4 h-4 bg-pink-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 z-10"></div>
+                </div>
+            </div>
+            
+            <!-- Lid -->
+            <div id="lid" class="gift-lid bg-gradient-to-b from-pink-500 to-pink-700 w-full h-1/2 rounded-t-lg absolute top-0 left-0 z-10"></div>
+        </div>
+    </div>
+    
+    <div id="message" class="hidden bg-white bg-opacity-90 p-8 rounded-lg max-w-md mx-auto text-center shadow-xl transform transition-all duration-500 origin-bottom scale-y-0 opacity-0 absolute bottom-0 left-1/2 -translate-x-1/2">
+        <h2 class="text-3xl font-bold text-pink-600 mb-4">Parabéns, Victoria!</h2>
+        <p class="text-lg text-pink-800 mb-4">Hoje você celebra seus 15 anos com brilho, graça e alegria.</p>
+        <p class="text-lg text-pink-800">Que este novo ciclo comece com amor, sonhos realizados e momentos inesquecíveis!</p>
+        <div class="mt-6">
+            <span class="inline-block text-4xl text-pink-400 animate-bounce">🎀</span>
+        </div>
+    </div>
+    
+    <div class="absolute inset-0 overflow-hidden pointer-events-none mb-16" id="confetti-container"></div>
+    
+    <script>
+        const gift = document.getElementById('gift');
+        const lid = document.getElementById('lid');
+        const message = document.getElementById('message');
+        const confettiContainer = document.getElementById('confetti-container');
+        let opened = false;
+        
+        gift.addEventListener('click', () => {
+            if (opened) return;
+            
+            opened = true;
+            gift.classList.add('gift-opened');
+            
+            // Show message with animation coming out of the box
+            setTimeout(() => {
+                message.classList.remove('hidden');
+                setTimeout(() => {
+                    message.classList.remove('scale-y-0', 'opacity-0');
+                    message.classList.add('scale-y-100', 'opacity-100');
+                }, 100);
+            }, 800);
+            
+            // Create confetti
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#ff69b4', '#ffb6c1', '#ff1493', '#db7093']
+            });
+            
+            // Create falling hearts
+            for (let i = 0; i < 20; i++) {
+                createHeart();
+            }
+        });
+        
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.innerHTML = '❤️';
+            heart.classList.add('heart');
+            
+            // Random position at the top
+            const startPositionX = Math.random() * window.innerWidth;
+            
+            // Random animation duration
+            const duration = 3 + Math.random() * 3;
+            
+            heart.style.left = `${startPositionX}px`;
+            heart.style.top = `70%`;
+            heart.style.animationDuration = `${duration}s`;
+            
+            confettiContainer.appendChild(heart);
+            
+            // Remove heart after animation
+            setTimeout(() => {
+                heart.remove();
+            }, duration * 1000);
+        }
+        
+        // Add some floating hearts in the background
+        for (let i = 0; i < 10; i++) {
+            setTimeout(() => {
+                createHeart();
+            }, i * 1000);
+        }
+    </script>
+</body>
+</html>
